@@ -2,13 +2,14 @@ class Promise
 
   attr_reader :id, :text, :end_datetime, :interval, :users_id, :created_at
 
-  def initialize(id:, text:, end_datetime:, interval:, users_id:, created_at:)
+  def initialize(id:, text:, end_datetime:, interval:, users_id:, created_at:, last_reminder_time:)
     @id = id
     @text = text
     @end_datetime = end_datetime
     @interval = interval
     @users_id = users_id
     @created_at = created_at
+    @last_reminder_time = last_reminder_time
   end
 
   def self.all
@@ -20,7 +21,13 @@ class Promise
 
     result = connection.exec("SELECT * FROM promise")
     result.map do |promise|
-      Promise.new(id: promise['id'], text: promise['text'], end_datetime: promise['end_datetime'], interval: promise['interval'], users_id: promise['users_id'], created_at: promise['created_at'])
+      Promise.new(id: promise['id'],
+        text: promise['text'],
+        end_datetime: promise['end_datetime'],
+        interval: promise['interval'],
+        users_id: promise['users_id'],
+        created_at: promise['created_at'],
+        last_reminder_time: promise['last_reminder_time'])
     end
   end
 

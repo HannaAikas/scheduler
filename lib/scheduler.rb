@@ -1,5 +1,7 @@
 require 'promise'
+require 'user'
 require 'twilio-ruby'
+require 'date'
 
 class Scheduler
   def iterate_database
@@ -7,11 +9,12 @@ class Scheduler
       @promises = Promise.all
 
       @promises.each do |promise|
-        time_of_promise = promise.created_at
-
-        users_id = promise.users_id
-        users_info = User.fetch_user(users_id)
-        to = users_info.mobile
+        current_time = DateTime.now
+        if current_time - promise.last_reminder_time > promise.interval
+          users_id = promise.users_id
+          users_info = User.fetch_user(users_id)
+          to = users_info.mobile
+        end
       end
 
       sleep(60)
