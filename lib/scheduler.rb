@@ -1,40 +1,48 @@
 require 'promise'
 require 'user'
-require 'twilio-ruby'
 require 'date'
+require 'text_sender'
 
 class Scheduler
+  attr_reader :client
+
+  def initialize(twilio_client=TextSender.new)
+    @client = twilio_client
+  end
+
   def iterate_database
     while true
-      @promises = Promise.all
-
-      @promises.each do |promise|
-        current_time = DateTime.now
-        if current_time - promise.last_reminder_time > promise.interval
-          users_id = promise.users_id
-          users_info = User.fetch_user(users_id)
-          to = users_info.mobile
-        end
+      Promise.all.each do |promise|
+        process(promise)
       end
 
       sleep(60)
     end
   end
 
-  def initilize_twilio
-    # REMINDER - MOVE THIS INTO ENV, BEFORE PUSHING TO GITHUB
-    account_sid = 'INPUT TWILIO SID'
-    auth_token = 'INPUT TWILIO AUTH TOKEN'
-    @client = Twilio::REST::Client.new(account_sid, auth_token)
-    @from = '+441442800614' # Your Twilio number
+  def process(promise)
+    current_time = DateTime.now.to_time
+    one_day_timedifference = 3600 * 24
+
+    if current_time - promise.last_reminder_time.to_time > one_day_timedifference &&
+      current_time < promise.end_datetime.to_time
+
+      user_id = promise.user_id
+      user_info = User.fetch_user(user_id)
+      user_mobile = user_info[0].mobile
+
+      @client.messages.create(
+      from: @from,
+      to: user_mobile,
+      body: "WOW, this is magic!"
+      )
+
+      promise.update_last_reminder_time(current_time)
+    end
   end
+end
 
-
-
-  @client.messages.create(
-  from: @from,
-  to: to,
-  body: "WOW, this is magic!"
-  )
-
+if __FILE__ == $0
+  Scheduler.initialize_twilio
+  Scheduler.iterate_datebase
 end

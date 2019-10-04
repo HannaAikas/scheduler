@@ -9,13 +9,13 @@ class User
 
   def self.fetch_user(users_id)
     if ENV['ENVIRONMENT'] == 'test'
-      connection = PG.connect(dbname: 'user_test')
+      connection = PG.connect(dbname: 'iPromise_test')
     else
-      connection = PG.connect(dbname: 'user')
+      connection = PG.connect(dbname: 'iPromise_development')
     end
 
-    result = connection.exec("SELECT * FROM user WHERE id='#{users_id}'")
-    result.map do |promise|
+    result = connection.exec("SELECT * FROM users WHERE id='#{users_id}'")
+    result.map do |user|
       User.new(id: user['id'], firstname: user['firstname'], mobile: user['mobile'])
     end
   end
