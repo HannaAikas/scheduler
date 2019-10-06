@@ -17,24 +17,21 @@ describe Scheduler do
 
       allow(promise_double).to receive(:update_last_reminder_time)
 
+      text_sender_double = double("text_sender")
+      allow(text_sender_double).to receive(:send_text)
+      new_subject = Scheduler.new(text_sender_double)
 
-      #double for @client
-      client_double = double("client")
-      messages_double = double("messages")
-      allow(client_double).to receive(:messages).and_return(messages_double)
-      allow(messages_double).to receive(:create)
-
+      # stub current time so that a reminder should be sent out
       allow(DateTime).to receive(:now).and_return(dt1)
 
-      new_subject = Scheduler.new(client_double)
-      # expect text
       new_subject.process(promise_double)
-      # expect(new_subject.client).to have_received(:messages)
+      expect(text_sender_double).to have_received(:send_text)
 
+      # stub current time so that no reminder should be sent out
       allow(DateTime).to receive(:now).and_return(dt2)
       # not expect text
       new_subject.process(promise_double)
-      expect(new_subject.client).to have_received(:messages).once
+      expect(text_sender_double).to have_received(:send_text).once
     end
 
   end

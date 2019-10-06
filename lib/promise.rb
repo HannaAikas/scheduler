@@ -40,7 +40,7 @@ class Promise
       connection = PG.connect(dbname: 'iPromise_development')
     end
 
-    sql = "UPDATE promises SET last_reminder_time = #{current_time}
+    sql = "UPDATE promises SET last_reminder_time = '#{current_time}'
         WHERE id = #{@user_id}"
     result = connection.exec(sql)
 
